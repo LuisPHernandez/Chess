@@ -60,11 +60,6 @@ class Board:
 
         return fen_string
 
-    def display(self):
-        # Display the current state of the board
-        print(self.convert_to_FEN())
-        
-
     def move_piece(self, start_pos, end_pos):
         """
         Move a piece from start_pos to end_pos.
