@@ -3,45 +3,45 @@ from pieces import *
 class Board:
     def __init__(self):
         # Board initializes with standard chess setup
-        self.board = [[None] * 8 for i in range(8)]
+        self.board_state = [[None] * 8 for i in range(8)]
         self.setup_board()
 
     def setup_board(self):
         # Place pawns
         for file in range(8):
-            self.board[6][file] = Pawn("white")
-            self.board[1][file] = Pawn("black")
+            self.board_state[6][file] = Pawn("white")
+            self.board_state[1][file] = Pawn("black")
 
         # Place rooks
-        self.board[0][0] = Rook("black")
-        self.board[0][7] = Rook("black")
-        self.board[7][0] = Rook("white")
-        self.board[7][7] = Rook("white")
+        self.board_state[0][0] = Rook("black")
+        self.board_state[0][7] = Rook("black")
+        self.board_state[7][0] = Rook("white")
+        self.board_state[7][7] = Rook("white")
 
         # Place knights
-        self.board[0][1] = Knight("black")
-        self.board[0][6] = Knight("black")
-        self.board[7][1] = Knight("white")
-        self.board[7][6] = Knight("white")
+        self.board_state[0][1] = Knight("black")
+        self.board_state[0][6] = Knight("black")
+        self.board_state[7][1] = Knight("white")
+        self.board_state[7][6] = Knight("white")
 
         # Place bishops
-        self.board[0][2] = Bishop("black")
-        self.board[0][5] = Bishop("black")
-        self.board[7][2] = Bishop("white")
-        self.board[7][5] = Bishop("white")
+        self.board_state[0][2] = Bishop("black")
+        self.board_state[0][5] = Bishop("black")
+        self.board_state[7][2] = Bishop("white")
+        self.board_state[7][5] = Bishop("white")
 
         # Place queens
-        self.board[0][3] = Queen("black")
-        self.board[7][3] = Queen("white")
+        self.board_state[0][3] = Queen("black")
+        self.board_state[7][3] = Queen("white")
 
         # Place kings
-        self.board[0][4] = King("black")
-        self.board[7][4] = King("white")
+        self.board_state[0][4] = King("black")
+        self.board_state[7][4] = King("white")
 
     def convert_to_FEN(self):
         fen_string = ""
 
-        for rank in self.board:
+        for rank in self.board_state:
             empty_count = 0  # Count consecutive empty squares in a rank
 
             for file in rank:
@@ -68,11 +68,11 @@ class Board:
         """
         start_rank, start_file = start_pos
         end_rank, end_file = end_pos
-        piece = self.board[start_rank][start_file]
+        piece = self.board_state[start_rank][start_file]
 
         # Perform the move
-        self.board[end_rank][end_file] = piece
-        self.board[start_rank][start_file] = " "
+        self.board_state[end_rank][end_file] = piece
+        self.board_state[start_rank][start_file] = " "
 
     def get_piece(self, position):
         """
@@ -81,4 +81,4 @@ class Board:
         :return: The piece at the position.
         """
         row, col = position
-        return self.board[row][col]
+        return self.board_state[row][col]
