@@ -18,7 +18,7 @@ class Pawn(Piece):
         moves = [] # Possible moves
         rank, file = position
 
-        direction = -1 if self.color == "White" else 1 # White moves up, Black moves down
+        direction = -1 if self.color == "white" else 1 # White moves up, Black moves down
 
         # Moving forward one square	is possible if the next square in the correct direction is empty
         if board[rank + direction][file] is None:

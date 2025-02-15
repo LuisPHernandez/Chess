@@ -9,34 +9,34 @@ class Board:
     def setup_board(self):
         # Place pawns
         for file in range(8):
-            self.board[1][file] = Pawn("White")
-            self.board[6][file] = Pawn("Black")
+            self.board[1][file] = Pawn("white")
+            self.board[6][file] = Pawn("black")
 
         # Place rooks
-        self.board[0][0] = Rook("Black")
-        self.board[0][7] = Rook("Black")
-        self.board[7][0] = Rook("White")
-        self.board[7][7] = Rook("White")
+        self.board[0][0] = Rook("black")
+        self.board[0][7] = Rook("black")
+        self.board[7][0] = Rook("white")
+        self.board[7][7] = Rook("white")
 
         # Place knights
-        self.board[0][1] = Knight("Black")
-        self.board[0][6] = Knight("Black")
-        self.board[7][1] = Knight("White")
-        self.board[7][6] = Knight("White")
+        self.board[0][1] = Knight("black")
+        self.board[0][6] = Knight("black")
+        self.board[7][1] = Knight("white")
+        self.board[7][6] = Knight("white")
 
         # Place bishops
-        self.board[0][2] = Bishop("Black")
-        self.board[0][5] = Bishop("Black")
-        self.board[7][2] = Bishop("White")
-        self.board[7][5] = Bishop("White")
+        self.board[0][2] = Bishop("black")
+        self.board[0][5] = Bishop("black")
+        self.board[7][2] = Bishop("white")
+        self.board[7][5] = Bishop("white")
 
         # Place queens
-        self.board[0][3] = Queen("Black")
-        self.board[7][3] = Queen("White")
+        self.board[0][3] = Queen("black")
+        self.board[7][3] = Queen("white")
 
         # Place kings
-        self.board[0][4] = King("Black")
-        self.board[7][4] = King("White")
+        self.board[0][4] = King("black")
+        self.board[7][4] = King("white")
 
     def convert_to_FEN(self):
         fen_string = ""
