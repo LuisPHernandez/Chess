@@ -75,7 +75,7 @@ class ChessGUI:
             for move in self.highlighted_moves:
                 rank, file = move
                 rank = abs(7 - rank)
-                pygame.draw.circle(self.screen, (102, 102, 102), (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), (SQUARE_SIZE * 0.4))
+                pygame.draw.circle(self.screen, (145, 145, 145), (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), (SQUARE_SIZE * 0.4))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

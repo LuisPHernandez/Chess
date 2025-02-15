@@ -209,3 +209,4 @@ class King(Piece):
         add_diagonal_moves(-1, 1)   # Up-right
         add_diagonal_moves(1, -1)   # Down-left
         add_diagonal_moves(1, 1)    # Down-right
+        return moves
