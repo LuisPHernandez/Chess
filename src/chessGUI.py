@@ -29,6 +29,7 @@ class ChessGUI:
     def __init__(self):
         pygame.init()
         self.board = Board()
+        self.highlighted_moves = []
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.load_images()
         self.running = True
@@ -62,13 +63,31 @@ class ChessGUI:
                     self.screen.blit(self.images[char], (file * SQUARE_SIZE, rank * SQUARE_SIZE))
                     file += 1
 
+    def store_possible_moves(self, possible_moves):
+        self.highlighted_moves = possible_moves
+        
     # Runs the main game loop
     def run(self):
         while self.running:
             self.draw_board()
             self.draw_pieces()
+
+            for move in self.highlighted_moves:
+                rank, file = move
+                rank = abs(7 - rank)
+                pygame.draw.circle(self.screen, (102, 102, 102), (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), (SQUARE_SIZE * 0.4))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == pygame.MOUSEBUTTONUP:
+                    x, y = pygame.mouse.get_pos()
+                    file = int(x // SQUARE_SIZE)
+                    rank = int(abs(800 - y) // SQUARE_SIZE)
+                    piece = self.board.board_state[rank][file]
+                    if piece != None:
+                        possible_moves = piece.get_moves(self.board.board_state, (rank, file))
+                        self.store_possible_moves(possible_moves)
+
             pygame.display.update()
         pygame.quit()
