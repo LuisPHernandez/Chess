@@ -24,7 +24,7 @@ class Pawn(Piece):
         if board[rank + direction][file] is None:
             moves.append((rank + direction, file))
 
-        if self.rank == 6 or self.rank == 1 and rank + (2 * direction) > 1 and rank + (2 * direction) < 6:
+        if rank == 6 or rank == 1 and rank + (2 * direction) > 1 and rank + (2 * direction) < 6:
             if board[rank + (2 * direction)][file] is None:
                 moves.append((rank + (2 * direction), file))
 
@@ -32,6 +32,8 @@ class Pawn(Piece):
             new_file = file + diagonal
             if 0 <= new_file < 8 and board[rank + direction][new_file] is not None and board[rank + direction][new_file].color != self.color:
                 moves.append((rank + direction, new_file))
+
+        return moves
 
 class Rook(Piece):
     def __init__(self, color):
