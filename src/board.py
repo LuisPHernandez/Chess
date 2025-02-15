@@ -9,8 +9,8 @@ class Board:
     def setup_board(self):
         # Place pawns
         for file in range(8):
-            self.board[1][file] = Pawn("white")
-            self.board[6][file] = Pawn("black")
+            self.board[6][file] = Pawn("white")
+            self.board[1][file] = Pawn("black")
 
         # Place rooks
         self.board[0][0] = Rook("black")
