@@ -3,7 +3,7 @@ class Piece:
         self.color = color # Black or White
         self.current_pos = pos # Current position in board
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         """
         Generate possible moves for this piece.
         Should be overridden by subclasses.
@@ -15,9 +15,9 @@ class Pawn(Piece):
         super().__init__(color, pos)
         self.FEN = "p" if color == "black" else "P"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = [] # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         direction = 1 if self.color == "white" else -1 # White moves up, Black moves down
 
@@ -41,9 +41,9 @@ class Rook(Piece):
         super().__init__(color, pos)
         self.FEN = "r" if color == "black" else "R"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = [] # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         def add_moves(delta_rank, delta_file):
             r, f = rank + delta_rank, file + delta_file
@@ -70,9 +70,9 @@ class Knight(Piece):
         super().__init__(color, pos)
         self.FEN = "n" if color == "black" else "N"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = []  # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         # Define all possible knight move variations
         knight_deltas = [
@@ -97,9 +97,9 @@ class Bishop(Piece):
         super().__init__(color, pos)
         self.FEN = "b" if color == "black" else "B"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = [] # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         def add_moves(delta_rank, delta_file):
             r, f = rank + delta_rank, file + delta_file
@@ -126,9 +126,9 @@ class Queen(Piece):
         super().__init__(color, pos)
         self.FEN = "q" if color == "black" else "Q"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = [] # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         def add_straight_line_moves(delta_rank, delta_file):
             r, f = rank + delta_rank, file + delta_file
@@ -175,9 +175,9 @@ class King(Piece):
         super().__init__(color, pos)
         self.FEN = "k" if color == "black" else "K"
 
-    def get_moves(self, board, position):
+    def get_moves(self, board):
         moves = []  # Possible moves
-        rank, file = position
+        rank, file = self.current_pos
 
         def add_straight_line_moves(delta_rank, delta_file):
             r, f = rank + delta_rank, file + delta_file

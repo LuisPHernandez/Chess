@@ -91,7 +91,7 @@ class ChessGUI:
             for file in range(8):
                 piece = self.board.board_state[rank][file]
                 if piece is not None and piece.color != color:
-                    moves = piece.get_moves(self.board.board_state, (rank, file))
+                    moves = piece.get_moves(self.board.board_state)
                     for move in moves:
                         if move == king_position:
                             return True
@@ -118,7 +118,7 @@ class ChessGUI:
                     piece = self.board.board_state[rank][file]
                     if (piece != None) and (piece.color == turn):
                         self.ACTIVE_PIECE = piece
-                        possible_moves = piece.get_moves(self.board.board_state, (rank, file))
+                        possible_moves = piece.get_moves(self.board.board_state)
                         self.store_possible_moves(possible_moves)
                     else:
                         if (rank , file) in self.highlighted_moves:
