@@ -29,6 +29,7 @@ class ChessGUI:
     def __init__(self):
         pygame.init()
         self.board = Board()
+        self.ACTIVE_PIECE = None
         self.highlighted_moves = []
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.load_images()
@@ -55,6 +56,7 @@ class ChessGUI:
     def draw_pieces(self):
         fen = self.board.convert_to_FEN().split("\n")
         for rank, line in enumerate(fen):
+            rank = abs(7- rank)
             file = 0
             for char in line:
                 if char.isdigit():
@@ -63,11 +65,40 @@ class ChessGUI:
                     self.screen.blit(self.images[char], (file * SQUARE_SIZE, rank * SQUARE_SIZE))
                     file += 1
 
+    # Stores the possible moves for the active piece
     def store_possible_moves(self, possible_moves):
         self.highlighted_moves = possible_moves
+
+    # Changes turns between white and black
+    def change_turns(self, color):
+        if color == "white":
+            color = "black"
+        else:
+            color = "white"
+        return color
+    
+    # Checks if the given color king is in check
+    def is_in_check(self, color):
+        king_position = None
+        for rank in range(8):
+            for file in range(8):
+                piece = self.board.board_state[rank][file]
+                if piece is not None and isinstance(piece, King) and piece.color == color:
+                    king_position = (rank, file)
+                    break  # Stop once the king's position is known
+        
+        for rank in range(8):
+            for file in range(8):
+                piece = self.board.board_state[rank][file]
+                if piece is not None and piece.color != color:
+                    moves = piece.get_moves(self.board.board_state, (rank, file))
+                    for move in moves:
+                        if move == king_position:
+                            return True
         
     # Runs the main game loop
     def run(self):
+        turn = "white"
         while self.running:
             self.draw_board()
             self.draw_pieces()
@@ -85,9 +116,16 @@ class ChessGUI:
                     file = int(x // SQUARE_SIZE)
                     rank = int(abs(800 - y) // SQUARE_SIZE)
                     piece = self.board.board_state[rank][file]
-                    if piece != None:
+                    if (piece != None) and (piece.color == turn):
+                        self.ACTIVE_PIECE = piece
                         possible_moves = piece.get_moves(self.board.board_state, (rank, file))
                         self.store_possible_moves(possible_moves)
+                    else:
+                        if (rank , file) in self.highlighted_moves:
+                            self.board.move_piece(self.ACTIVE_PIECE, (rank, file))
+                            turn = self.change_turns(turn)
+                            self.ACTIVE_PIECE = None
+                            self.highlighted_moves = []
 
             pygame.display.update()
         pygame.quit()
