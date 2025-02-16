@@ -1,6 +1,7 @@
 class Piece:
-    def __init__(self, color):
+    def __init__(self, color, pos):
         self.color = color # Black or White
+        self.current_pos = pos # Current position in board
 
     def get_moves(self, board, position):
         """
@@ -10,15 +11,15 @@ class Piece:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
 class Pawn(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "p" if color == "black" else "P"
 
     def get_moves(self, board, position):
         moves = [] # Possible moves
         rank, file = position
 
-        direction = -1 if self.color == "white" else 1 # White moves up, Black moves down
+        direction = 1 if self.color == "white" else -1 # White moves up, Black moves down
 
         # Moving forward one square	is possible if the next square in the correct direction is empty
         if board[rank + direction][file] is None:
@@ -36,8 +37,8 @@ class Pawn(Piece):
         return moves
 
 class Rook(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "r" if color == "black" else "R"
 
     def get_moves(self, board, position):
@@ -65,8 +66,8 @@ class Rook(Piece):
         return moves
 
 class Knight(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "n" if color == "black" else "N"
 
     def get_moves(self, board, position):
@@ -92,8 +93,8 @@ class Knight(Piece):
         return moves
     
 class Bishop(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "b" if color == "black" else "B"
 
     def get_moves(self, board, position):
@@ -121,8 +122,8 @@ class Bishop(Piece):
         return moves
 
 class Queen(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "q" if color == "black" else "Q"
 
     def get_moves(self, board, position):
@@ -170,8 +171,8 @@ class Queen(Piece):
         return moves
 
 class King(Piece):
-    def __init__(self, color):
-        super().__init__(color)
+    def __init__(self, color, pos):
+        super().__init__(color, pos)
         self.FEN = "k" if color == "black" else "K"
 
     def get_moves(self, board, position):

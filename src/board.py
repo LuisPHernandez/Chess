@@ -9,34 +9,34 @@ class Board:
     def setup_board(self):
         # Place pawns
         for file in range(8):
-            self.board_state[6][file] = Pawn("white")
-            self.board_state[1][file] = Pawn("black")
+            self.board_state[1][file] = Pawn("white", (1, file))
+            self.board_state[6][file] = Pawn("black", (6, file))
 
         # Place rooks
-        self.board_state[0][0] = Rook("black")
-        self.board_state[0][7] = Rook("black")
-        self.board_state[7][0] = Rook("white")
-        self.board_state[7][7] = Rook("white")
+        self.board_state[0][0] = Rook("white", (0, 0))
+        self.board_state[0][7] = Rook("white", (0, 7))
+        self.board_state[7][0] = Rook("black", (7, 0))
+        self.board_state[7][7] = Rook("black", (7, 7))
 
         # Place knights
-        self.board_state[0][1] = Knight("black")
-        self.board_state[0][6] = Knight("black")
-        self.board_state[7][1] = Knight("white")
-        self.board_state[7][6] = Knight("white")
+        self.board_state[0][1] = Knight("white", (0, 1))
+        self.board_state[0][6] = Knight("white", (0, 6))
+        self.board_state[7][1] = Knight("black", (7, 1))
+        self.board_state[7][6] = Knight("black", (7, 6))
 
         # Place bishops
-        self.board_state[0][2] = Bishop("black")
-        self.board_state[0][5] = Bishop("black")
-        self.board_state[7][2] = Bishop("white")
-        self.board_state[7][5] = Bishop("white")
+        self.board_state[0][2] = Bishop("white", (0, 2))
+        self.board_state[0][5] = Bishop("white", (0, 5))
+        self.board_state[7][2] = Bishop("black", (7, 2))
+        self.board_state[7][5] = Bishop("black", (7, 5))
 
         # Place queens
-        self.board_state[0][3] = Queen("black")
-        self.board_state[7][3] = Queen("white")
+        self.board_state[0][3] = Queen("white", (0, 3))
+        self.board_state[7][3] = Queen("black", (7, 3))
 
         # Place kings
-        self.board_state[0][4] = King("black")
-        self.board_state[7][4] = King("white")
+        self.board_state[0][4] = King("white", (0, 4))
+        self.board_state[7][4] = King("black", (7, 4))
 
     def convert_to_FEN(self):
         fen_string = ""
@@ -60,19 +60,20 @@ class Board:
 
         return fen_string
 
-    def move_piece(self, start_pos, end_pos):
+    def move_piece(self, piece, end_pos):
         """
-        Move a piece from start_pos to end_pos.
-        :param start_pos: Tuple (row, col) for the starting position.
+        Move a piece to a end_pos.
+        :param piece: Object (Piece) that will perform the move.
         :param end_pos: Tuple (row, col) for the ending position.
         """
-        start_rank, start_file = start_pos
+        # Get the start and end positions
         end_rank, end_file = end_pos
-        piece = self.board_state[start_rank][start_file]
+        start_rank, start_file = piece.current_pos
 
         # Perform the move
+        self.board_state[start_rank][start_file] = None
         self.board_state[end_rank][end_file] = piece
-        self.board_state[start_rank][start_file] = " "
+        piece.current_pos = (end_rank, end_file)
 
     def get_piece(self, position):
         """
