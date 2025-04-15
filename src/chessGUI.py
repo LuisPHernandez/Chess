@@ -1,6 +1,6 @@
 import pygame
 import os
-from board import *
+from game import Game
 
 # Define global variables
 SCREEN_WIDTH = 800
@@ -28,9 +28,7 @@ class ChessGUI:
     # Initializes the graphical interface
     def __init__(self):
         pygame.init()
-        self.board = Board()
-        self.ACTIVE_PIECE = None
-        self.highlighted_moves = []
+        self.game = Game()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.load_images()
         self.running = True
@@ -54,7 +52,7 @@ class ChessGUI:
 
     # Draws pieces onto board
     def draw_pieces(self):
-        fen = self.board.convert_to_FEN().split("\n")
+        fen = self.game.board.convert_to_FEN().split("\n")
         for rank, line in enumerate(fen):
             rank = abs(7- rank)
             file = 0
@@ -64,62 +62,29 @@ class ChessGUI:
                 elif char in PIECE_IMAGES:
                     self.screen.blit(self.images[char], (file * SQUARE_SIZE, rank * SQUARE_SIZE))
                     file += 1
-
-    # Stores the possible moves for the active piece
-    def store_possible_moves(self, possible_moves):
-        self.highlighted_moves = possible_moves
-
-    # Changes turns between white and black
-    def change_turns(self, color):
-        if color == "white":
-            color = "black"
-        else:
-            color = "white"
-        return color
-    
-    # Checks if the given color king is in check
-    def is_in_check(self, color, board_state):
-        king_position = None
-        for rank in range(8):
-            for file in range(8):
-                piece = board_state[rank][file]
-                if piece is not None and isinstance(piece, King) and piece.color == color:
-                    king_position = (rank, file)
-                    break  # Stop once the king's position is known
-        
-        for rank in range(8):
-            for file in range(8):
-                piece = board_state[rank][file]
-                if piece is not None and piece.color != color:
-                    moves = piece.get_moves(board_state)
-                    for move in moves:
-                        if move == king_position:
-                            return True
-        return False
-    
-    # Filters the possible moves if there is a check position
-    def filter_moves(self, color, piece, moves):
-        filtered_moves = []
-        original_pos = piece.current_pos
-        for move in moves:
-            self.board.move_piece(piece, move) # Try each possible move
-            if not self.is_in_check(color, self.board.board_state): # Check if the move clears the check
-                filtered_moves.append(move)
-            self.board.move_piece(piece, original_pos)  # Reset the board back to its original state
-        return filtered_moves
         
     # Runs the main game loop
     def run(self):
-        turn = "white"
-        check = False
         while self.running:
             self.draw_board()
             self.draw_pieces()
 
-            for move in self.highlighted_moves:
+            # Highlight possible moves
+            for move in self.game.possible_moves:
                 rank, file = move
                 rank = abs(7 - rank)
-                pygame.draw.circle(self.screen, (145, 145, 145), (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), (SQUARE_SIZE * 0.4))
+                pygame.draw.circle(self.screen, (145, 145, 145), 
+                                (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), 
+                                ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), 
+                                (SQUARE_SIZE * 0.4))
+
+            # Display game status (optional)
+            if self.game.game_status == "check":
+                # Display check status
+                pass
+            elif self.game.game_status == "checkmate":
+                # Display checkmate status
+                pass
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -128,30 +93,15 @@ class ChessGUI:
                     x, y = pygame.mouse.get_pos()
                     file = int(x // SQUARE_SIZE)
                     rank = int(abs(800 - y) // SQUARE_SIZE)
-                    piece = self.board.board_state[rank][file]
-
-                    # Check if the player playing is in check
-                    check = self.is_in_check(turn, self.board.board_state)
-
-                    if (piece != None) and (piece.color == turn):
-                        # Get the selected piece's possible moves
-                        possible_moves = piece.get_moves(self.board.board_state)
-
-                        if check:
-                            possible_moves = self.filter_moves(turn, piece, possible_moves)
-
-                        self.ACTIVE_PIECE = piece
-                        self.store_possible_moves(possible_moves)
+                    
+                    # Select piece or make move
+                    if self.game.selected_piece is None:
+                        self.game.select_piece((rank, file))
                     else:
-                        if (rank , file) in self.highlighted_moves:
-                            self.board.move_piece(self.ACTIVE_PIECE, (rank, file))
-                            turn = self.change_turns(turn)
-                            
-                            # After moving, check if the new position puts the opponent in check
-                            check = self.is_in_check(turn, self.board.board_state)
-
-                            self.ACTIVE_PIECE = None
-                            self.highlighted_moves = []
+                        # Try to move the selected piece
+                        if not self.game.make_move((rank, file)):
+                            # If move failed, try to select a different piece
+                            self.game.select_piece((rank, file))
 
             pygame.display.update()
         pygame.quit()

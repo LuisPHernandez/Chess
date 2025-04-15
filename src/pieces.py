@@ -22,16 +22,19 @@ class Pawn(Piece):
         direction = 1 if self.color == "white" else -1 # White moves up, Black moves down
 
         # Moving forward one square	is possible if the next square in the correct direction is empty
-        if board[rank + direction][file] is None:
+        if ((rank + direction) < 8) and board[rank + direction][file] is None:
             moves.append((rank + direction, file))
 
-        if rank == 6 or rank == 1 and rank + (2 * direction) > 1 and rank + (2 * direction) < 6:
+        if (self.color == "white") and (rank == 1):
+            if board[rank + (2 * direction)][file] is None:
+                moves.append((rank + (2 * direction), file))
+        elif (self.color == "black") and (rank == 6):
             if board[rank + (2 * direction)][file] is None:
                 moves.append((rank + (2 * direction), file))
 
         for diagonal in [-1, 1, 2]:
             new_file = file + diagonal
-            if 0 <= new_file < 8 and board[rank + direction][new_file] is not None and board[rank + direction][new_file].color != self.color:
+            if (0 <= (rank + direction) < 8) and (0 <= new_file < 8) and (board[rank + direction][new_file] is not None) and (board[rank + direction][new_file].color != self.color):
                 moves.append((rank + direction, new_file))
 
         return moves

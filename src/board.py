@@ -62,9 +62,7 @@ class Board:
 
     def move_piece(self, piece, end_pos):
         """
-        Move a piece to a end_pos.
-        :param piece: Object (Piece) that will perform the move.
-        :param end_pos: Tuple (row, col) for the ending position.
+        Move a piece to an end position.
         """
         # Get the start and end positions
         end_rank, end_file = end_pos
@@ -78,8 +76,6 @@ class Board:
     def get_piece(self, position):
         """
         Get the piece at a specific position.
-        :param position: Tuple (row, col)
-        :return: The piece at the position.
         """
         row, col = position
         return self.board_state[row][col]
