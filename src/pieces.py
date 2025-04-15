@@ -32,7 +32,7 @@ class Pawn(Piece):
             if board[rank + (2 * direction)][file] is None:
                 moves.append((rank + (2 * direction), file))
 
-        for diagonal in [-1, 1, 2]:
+        for diagonal in [-1, 1]:
             new_file = file + diagonal
             if (0 <= (rank + direction) < 8) and (0 <= new_file < 8) and (board[rank + direction][new_file] is not None) and (board[rank + direction][new_file].color != self.color):
                 moves.append((rank + direction, new_file))

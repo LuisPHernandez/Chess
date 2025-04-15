@@ -6,6 +6,7 @@ class Game:
         self.board = Board()
         self.current_turn = "white"
         self.move_history = []  # List of moves in the format [(piece, from_pos, to_pos), ...]
+        self.last_status = "active" # active, check, checkmate, stalemate, draw
         self.game_status = "active"  # active, check, checkmate, stalemate, draw
         self.selected_piece = None
         self.possible_moves = []
@@ -118,18 +119,29 @@ class Game:
             "from": start_position,
             "to": end_position,
             "captured": captured_piece,
-            "half-move clock": self.halfmove_clock
+            "half-move clock": self.halfmove_clock,
+            "promotion": None
         })
         
         # Handle special moves
         if isinstance(moved_piece, Pawn):
-            # Handle en passant and pawn promotion
+            # Handle en passant
             if self.en_passant_target and (end_position == (self.en_passant_target[1], self.en_passant_target[2])):
                 self.move_history[-1]["captured"] = self.board.board_state[start_position[0]][end_position[1]]
                 self.board.board_state[start_position[0]][end_position[1]] = None
             
+            # Handle promotion
             # TODO: Implement promotion
-            
+            promotion_rank = 7 if moved_piece.color == "white" else 0
+            if end_position[0] == promotion_rank:
+                # Make the actual move
+                self.board.move_piece(moved_piece, end_position)
+
+                # Update game status to "promotion"
+                self.update_game_status(piece = moved_piece)
+                
+                return False
+
             # Set en passant target for the next move
             if abs(start_position[0] - end_position[0]) == 2:
                 self.en_passant_target = (moved_piece.color,
@@ -174,6 +186,33 @@ class Game:
         
         return True
     
+    def finish_promotion(self, selected_class):
+        """
+        Complete the promotion process by replacing the pawn with the selected piece.
+        """
+        if self.selected_piece is None or not isinstance(self.selected_piece, Pawn):
+            return
+        
+        pos = self.selected_piece.current_pos
+        color = self.selected_piece.color
+
+        new_piece = selected_class(color, pos)
+        self.board.board_state[pos[0]][pos[1]] = new_piece
+
+        # Update the last move in history to reflect the promotion
+        if self.move_history:
+            self.move_history[-1]["promotion"] = selected_class.__name__
+
+        # Reset game status
+        self.game_status = "active"
+
+        # Switch turns
+        self.current_turn = "black" if self.current_turn == "white" else "white"
+
+        # Clear selection
+        self.selected_piece = None
+        self.possible_moves = []
+
     def is_in_check(self, color):
         """
         Check if the king of the given color is in check.
@@ -231,12 +270,19 @@ class Game:
         # No legal moves and not in check = stalemate
         return True
     
-    def update_game_status(self):
+    def update_game_status(self, piece = None):
         """
         Update the game status after a move.
         """
         opponent_color = "black" if self.current_turn == "white" else "white"
         
+        # Check for promotion
+        if piece and isinstance(piece, Pawn):
+            promotion_rank = 7 if piece.color == "white" else 0
+            if piece.current_pos[0] == promotion_rank:
+                self.game_status = "promotion"
+                return
+
         # Check for checkmate or stalemate
         if self.is_checkmate(opponent_color):
             self.game_status = "checkmate"
@@ -306,12 +352,13 @@ class Game:
         from_pos = last_move["from"]
         to_pos = last_move["to"]
         captured = last_move["captured"]
-        
-        # Move the piece back
-        self.board.move_piece(piece, from_pos)
+        promotion = last_move["promotion"]
         
         # Check if this was an en passant capture
         was_en_passant = isinstance(piece, Pawn) and captured and to_pos != captured.current_pos
+
+        if promotion:
+            piece = Pawn(piece.color, to_pos)
     
         # Move the piece back
         self.board.move_piece(piece, from_pos)
