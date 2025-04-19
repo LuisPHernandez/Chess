@@ -159,9 +159,47 @@ class ChessGUI:
         winner_rect = winner_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 + 20))
         self.screen.blit(winner_text, winner_rect)
 
-        tip_text = small_font.render("Press any key to exit", True, (200, 200, 200))
+        tip_text = small_font.render("Exit", True, (200, 200, 200))
         tip_rect = tip_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 + 80))
         self.screen.blit(tip_text, tip_rect)
+
+        pygame.display.update()
+
+    def draw_stalemate_screen(self):
+        """Displays the stalemate screen"""
+        overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0)) 
+        self.screen.blit(overlay, (0, 0))
+
+        font = pygame.font.SysFont("arial", 72, bold=True)
+        text = font.render("Stalemate!", True, (255, 0, 0))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 - 50))
+        self.screen.blit(text, text_rect)
+
+        small_font = pygame.font.SysFont("arial", 36)
+        winner_text = small_font.render("The game is drawn", True, (255, 255, 255))
+        winner_rect = winner_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 + 20))
+        self.screen.blit(winner_text, winner_rect)
+
+        pygame.display.update()
+
+    def draw_tie_screen(self):
+        """Display the tie because of 50 move rule screen"""
+        overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0)) 
+        self.screen.blit(overlay, (0, 0))
+
+        font = pygame.font.SysFont("arial", 72, bold=True)
+        text = font.render("Tie!", True, (255, 0, 0))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 - 50))
+        self.screen.blit(text, text_rect)
+
+        small_font = pygame.font.SysFont("arial", 36)
+        winner_text = small_font.render("The game is drawn due to the 50-move rule.", True, (255, 255, 255))
+        winner_rect = winner_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 + 20))
+        self.screen.blit(winner_text, winner_rect)
 
         pygame.display.update()
         
@@ -191,8 +229,20 @@ class ChessGUI:
             if self.game.game_status == "checkmate":
                 if not self.game_end_sound_played:
                     self.sound_effects["game_end"].play()
+                    self.sound_effects["check"].play()
+                    self.check_sound_played = True
                     self.game_end_sound_played = True
                 self.draw_checkmate_screen()
+            if self.game.game_status == "stalemate":
+                if not self.game_end_sound_played:
+                    self.sound_effects["game_end"].play()
+                    self.game_end_sound_played = True
+                self.draw_stalemate_screen()
+            if self.game.game_status == "draw":
+                if not self.game_end_sound_played:
+                    self.sound_effects["game_end"].play()
+                    self.game_end_sound_played = True
+                self.draw_tie_screen()
 
             if self.promotion_active:
                 self.draw_promotion_dialog()

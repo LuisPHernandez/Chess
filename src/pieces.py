@@ -26,10 +26,10 @@ class Pawn(Piece):
             moves.append((rank + direction, file))
 
         if (self.color == "white") and (rank == 1):
-            if board[rank + (2 * direction)][file] is None:
+            if (board[rank + (2 * direction)][file] is None) and (board[rank + direction][file] is None):
                 moves.append((rank + (2 * direction), file))
         elif (self.color == "black") and (rank == 6):
-            if board[rank + (2 * direction)][file] is None:
+            if (board[rank + (2 * direction)][file] is None) and (board[rank + direction][file] is None):
                 moves.append((rank + (2 * direction), file))
 
         for diagonal in [-1, 1]:

@@ -10,10 +10,6 @@ class Game:
         self.game_status = "active"  # active, check, checkmate, stalemate, draw
         self.selected_piece = None
         self.possible_moves = []
-        self.kings = {
-            "white": self.find_king("white"),
-            "black": self.find_king("black")
-        }
         # For special moves
         self.en_passant_target = None
         self.castling_rights = {
@@ -65,8 +61,6 @@ class Game:
             
             # Make the move temporarily
             self.board.move_piece(piece, move)
-            if isinstance(piece, King):
-                self.kings[piece.color] = move
             
             # Check if the move would leave the king in check
             if not self.is_in_check(piece.color):
@@ -74,21 +68,27 @@ class Game:
             
             # Undo the move
             self.board.move_piece(piece, original_pos)
-            if isinstance(piece, King):
-                self.kings[piece.color] = original_pos
             if target_piece:
                 self.board.board_state[move[0]][move[1]] = target_piece
-        
-        # Add special moves
+                target_piece.current_pos = move
+    
+        # Add en passant moves
         if isinstance(piece, Pawn):
             if self.en_passant_target:
                 if (self.en_passant_target[0] != piece.color):
                     if (abs(self.en_passant_target[1] - piece.current_pos[0]) == 1) and (abs(self.en_passant_target[2] - piece.current_pos[1]) == 1):
                         legal_moves.append((self.en_passant_target[1], self.en_passant_target[2]))
-        elif isinstance(piece, King):
-            # TODO: Add castling logic
-            pass
-        
+        # Add castling moves
+        elif isinstance(piece, King) and (self.game_status != "check"):
+            if self.castling_rights[piece.color]["queenside"]:
+                if (self.board.board_state[piece.current_pos[0]][1] is None) and (self.board.board_state[piece.current_pos[0]][2] is None) and (self.board.board_state[piece.current_pos[0]][3] is None):
+                    if (not self.is_in_check(piece.color, (piece.current_pos[0], 2))) and (not self.is_in_check(piece.color, (piece.current_pos[0], 3))):
+                        legal_moves.append((piece.current_pos[0], 2))
+            if self.castling_rights[piece.color]["kingside"]:
+                if (self.board.board_state[piece.current_pos[0]][5] is None) and (self.board.board_state[piece.current_pos[0]][6] is None):
+                    if (not self.is_in_check(piece.color, (piece.current_pos[0], 5))):
+                        legal_moves.append((piece.current_pos[0], 6))
+
         return legal_moves
     
     def make_move(self, end_position):
@@ -99,6 +99,7 @@ class Game:
         if (self.selected_piece is None) or (end_position not in self.possible_moves):
             return False
         
+        castled = False
         start_position = self.selected_piece.current_pos
         moved_piece = self.selected_piece
         captured_piece = self.board.get_piece(end_position)
@@ -120,7 +121,11 @@ class Game:
             "to": end_position,
             "captured": captured_piece,
             "half-move clock": self.halfmove_clock,
-            "promotion": None
+            "promotion": None,
+            "castling": None,
+            "rook": None,
+            "rook_from": None,
+            "rook_to": None
         })
         
         # Handle special moves
@@ -131,7 +136,6 @@ class Game:
                 self.board.board_state[start_position[0]][end_position[1]] = None
             
             # Handle promotion
-            # TODO: Implement promotion
             promotion_rank = 7 if moved_piece.color == "white" else 0
             if end_position[0] == promotion_rank:
                 # Make the actual move
@@ -153,13 +157,34 @@ class Game:
         else:
             self.en_passant_target = None
         
-        # Update castling rights
         if isinstance(moved_piece, King):
+            # Handle castling move
+            if (self.castling_rights[moved_piece.color]["queenside"]) and (end_position == (moved_piece.current_pos[0], 2)):
+                self.move_history[-1]["castling"] = "queenside"
+                self.move_history[-1]["rook"] = self.board.board_state[end_position[0]][0]
+                self.move_history[-1]["rook_from"] = (end_position[0], 0)
+                self.move_history[-1]["rook_to"] = (end_position[0], 3)
+
+                self.board.board_state[end_position[0]][0] = None
+                self.board.board_state[end_position[0]][2] = King(moved_piece.color, (end_position[0], 2))
+                self.board.board_state[start_position[0]][start_position[1]] = None
+                self.board.board_state[end_position[0]][3] = Rook(moved_piece.color, (end_position[0], 3))
+                castled = True
+            elif (self.castling_rights[moved_piece.color]["kingside"]) and (end_position == (moved_piece.current_pos[0], 6)):
+                self.move_history[-1]["castling"] = "kingside"
+                self.move_history[-1]["rook"] = self.board.board_state[end_position[0]][7]
+                self.move_history[-1]["rook_from"] = (end_position[0], 7)
+                self.move_history[-1]["rook_to"] = (end_position[0], 5)
+
+                self.board.board_state[end_position[0]][7] = None
+                self.board.board_state[end_position[0]][6] = King(moved_piece.color, (end_position[0], 6))
+                self.board.board_state[start_position[0]][start_position[1]] = None
+                self.board.board_state[end_position[0]][5] = Rook(moved_piece.color, (end_position[0], 5))
+                castled = True
+
+            # Update castling rights
             self.castling_rights[moved_piece.color]["kingside"] = False
             self.castling_rights[moved_piece.color]["queenside"] = False
-            
-            # Handle castling move
-            # TODO: Implement castling
             
         elif isinstance(moved_piece, Rook):
             if start_position[1] == 0:  # Queenside rook
@@ -168,11 +193,8 @@ class Game:
                 self.castling_rights[moved_piece.color]["kingside"] = False
         
         # Make the actual move
-        self.board.move_piece(moved_piece, end_position)
-        
-        # Update king position if the king moved
-        if isinstance(moved_piece, King):
-            self.kings[moved_piece.color] = end_position
+        if not castled:
+            self.board.move_piece(moved_piece, end_position)
         
         # Check game status after the move
         self.update_game_status()
@@ -203,21 +225,24 @@ class Game:
         if self.move_history:
             self.move_history[-1]["promotion"] = selected_class.__name__
 
-        # Reset game status
-        self.game_status = "active"
-
         # Switch turns
         self.current_turn = "black" if self.current_turn == "white" else "white"
+
+        # Reset game status
+        self.update_game_status()
 
         # Clear selection
         self.selected_piece = None
         self.possible_moves = []
 
-    def is_in_check(self, color):
+    def is_in_check(self, color, position = None):
         """
         Check if the king of the given color is in check.
         """
-        king_position = self.kings[color]
+        if position:
+            king_position = position
+        else:
+            king_position = self.kings[color]
         opponent_color = "black" if color == "white" else "white"
         
         # Check if any opponent piece can attack the king
@@ -353,6 +378,9 @@ class Game:
         to_pos = last_move["to"]
         captured = last_move["captured"]
         promotion = last_move["promotion"]
+        castling = last_move["castling"]
+        rook = last_move["rook"]
+        rook_from = last_move["rook_from"]
         
         # Check if this was an en passant capture
         was_en_passant = isinstance(piece, Pawn) and captured and to_pos != captured.current_pos
@@ -360,6 +388,9 @@ class Game:
         if promotion:
             piece = Pawn(piece.color, to_pos)
     
+        if castling:
+            self.board.move_piece(rook, rook_from)
+
         # Move the piece back
         self.board.move_piece(piece, from_pos)
     
@@ -375,10 +406,6 @@ class Game:
                 # Normal capture
                 self.board.board_state[to_pos[0]][to_pos[1]] = captured
                 captured.current_pos = to_pos
-        
-        # Update king position if it was a king that moved
-        if isinstance(piece, King):
-            self.kings[piece.color] = from_pos
 
          # Restore the halfmove clock from before this move was made
         if len(self.move_history) > 0:
