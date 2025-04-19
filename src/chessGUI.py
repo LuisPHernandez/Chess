@@ -84,7 +84,7 @@ class ChessGUI:
                 if char.isdigit():
                     file += int(char)
                 elif char in PIECE_IMAGES:
-                    self.screen.blit(self.images[char], (file * SQUARE_SIZE, rank * SQUARE_SIZE))
+                    self.screen.blit(self.images[char], (file * self.square_size, rank * self.square_size))
                     file += 1
 
     def draw_promotion_dialog(self):
@@ -96,10 +96,10 @@ class ChessGUI:
         color = self.game.current_turn
         
         # Draw background
-        dialog_width = SQUARE_SIZE
-        dialog_height = SQUARE_SIZE * 4  # For Q, R, B, N
-        dialog_x = file * SQUARE_SIZE
-        dialog_y = 0 if rank == 7 else SCREEN_HEIGHT - dialog_height  # Position based on rank
+        dialog_width = self.square_size
+        dialog_height = self.square_size * 4  # For Q, R, B, N
+        dialog_x = file * self.square_size
+        dialog_y = 0 if rank == 7 else self.square_size - dialog_height  # Position based on rank
         
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_width, dialog_height)
         pygame.draw.rect(self.screen, (230, 230, 230), dialog_rect)
@@ -113,13 +113,13 @@ class ChessGUI:
         for i, piece in enumerate(pieces):
             piece_rect = pygame.Rect(
                 dialog_x, 
-                dialog_y + (i * SQUARE_SIZE), 
-                SQUARE_SIZE, 
-                SQUARE_SIZE
+                dialog_y + (i * self.square_size), 
+                self.square_size, 
+                self.square_size
             )
             pygame.draw.rect(self.screen, (200, 200, 200) if i % 2 == 0 else (180, 180, 180), piece_rect)
             # Draw the piece
-            self.screen.blit(self.images[piece], (dialog_x, dialog_y + (i * SQUARE_SIZE)))
+            self.screen.blit(self.images[piece], (dialog_x, dialog_y + (i * self.square_size)))
 
     def handle_promotion_selection(self, x, y):
         """Handle the selection of what piece the promoted Pawn will become"""
@@ -127,12 +127,12 @@ class ChessGUI:
             return None
             
         rank, file = self.game.selected_piece.current_pos
-        dialog_x = file * SQUARE_SIZE
-        dialog_y = 0 if rank == 7 else SCREEN_HEIGHT - (SQUARE_SIZE * 4)
+        dialog_x = file * self.square_size
+        dialog_y = 0 if rank == 7 else self.height - (self.square_size * 4)
         
         # Check if click is within dialog
-        if dialog_x <= x < dialog_x + SQUARE_SIZE and dialog_y <= y < dialog_y + (SQUARE_SIZE * 4):
-            selection_index = int((y - dialog_y) // SQUARE_SIZE)
+        if dialog_x <= x < dialog_x + self.square_size and dialog_y <= y < dialog_y + (self.square_size * 4):
+            selection_index = int((y - dialog_y) // self.square_size)
             promotion_pieces = [Queen, Rook, Bishop, Knight]
             selected_piece_class = promotion_pieces[selection_index]
             
@@ -215,9 +215,9 @@ class ChessGUI:
                 rank, file = move
                 rank = abs(7 - rank)
                 pygame.draw.circle(self.screen, (145, 145, 145), 
-                                (((SQUARE_SIZE * file) + (SQUARE_SIZE * 0.5)), 
-                                ((SQUARE_SIZE * rank) + (SQUARE_SIZE * 0.5))), 
-                                (SQUARE_SIZE * 0.4))
+                                (((self.square_size * file) + (self.square_size * 0.5)), 
+                                ((self.square_size * rank) + (self.square_size * 0.5))), 
+                                (self.square_size * 0.4))
 
             # Display game status
             if self.game.game_status == "check":
@@ -252,8 +252,8 @@ class ChessGUI:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     x, y = pygame.mouse.get_pos()
-                    file = int(x // SQUARE_SIZE)
-                    rank = int(abs(800 - y) // SQUARE_SIZE)
+                    file = int(x // self.square_size)
+                    rank = int(abs(800 - y) // self.square_size)
                     
                     if self.promotion_active:
                         selected_class = self.handle_promotion_selection(x, y)
