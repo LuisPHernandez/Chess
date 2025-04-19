@@ -242,7 +242,7 @@ class Game:
         if position:
             king_position = position
         else:
-            king_position = self.kings[color]
+            king_position = self.find_king(color)
         opponent_color = "black" if color == "white" else "white"
         
         # Check if any opponent piece can attack the king

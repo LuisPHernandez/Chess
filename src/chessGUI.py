@@ -4,9 +4,6 @@ from game import Game
 from pieces import *
 
 # Define global variables
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 800
-SQUARE_SIZE = (SCREEN_WIDTH / 8)
 WHITE = (238, 238, 210)
 BLACK = (118, 150, 86)
 
@@ -36,11 +33,14 @@ SFX = {
 }
 
 class ChessGUI:
-    def __init__(self):
+    def __init__(self, width=800, height=800):
         """Initializes the graphical interface"""
         pygame.init()
+        self.width = width
+        self.height = height
+        self.square_size = min(width, height) / 8
         self.game = Game()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self.load_images()
         self.load_sound_effects()
         self.running = True
@@ -55,7 +55,7 @@ class ChessGUI:
 
         for piece, file in PIECE_IMAGES.items():
             path = os.path.join(images_dir, file)
-            self.images[piece] = pygame.transform.scale(pygame.image.load(path), (SQUARE_SIZE, SQUARE_SIZE))
+            self.images[piece] = pygame.transform.scale(pygame.image.load(path), (self.square_size, self.square_size))
     
     def load_sound_effects(self):
         """Loads sound effects"""
@@ -70,7 +70,7 @@ class ChessGUI:
         """Draws board on the screen"""
         for rank in range(0, 8):
             for file in range(0, 8):    
-                square = pygame.Rect((rank * SQUARE_SIZE), (file * SQUARE_SIZE), SQUARE_SIZE, SQUARE_SIZE)
+                square = pygame.Rect((rank * self.square_size), (file * self.square_size), self.square_size, self.square_size)
                 color = WHITE if (rank + file) % 2 == 0 else BLACK
                 pygame.draw.rect(self.screen, color, square)
 
