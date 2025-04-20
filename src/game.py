@@ -18,6 +18,7 @@ class Game:
         }
         self.halfmove_clock = 0  # For 50-move rule
         self.fullmove_number = 1  # Increments after black's move
+        self.repetition_count = {} # For threefold repetition rule
 
     def find_king(self, color):
         """Find the position of a king of the specified color"""
@@ -196,9 +197,14 @@ class Game:
         if not castled:
             self.board.move_piece(moved_piece, end_position)
         
+        # Update repetition count for threefold repetition rule
+        fen = self.get_fen().split(" ")[0:4]  # Ignore halfmove/fullmove for repetition
+        fen_key = " ".join(fen)
+        self.repetition_count[fen_key] = self.repetition_count.get(fen_key, 0) + 1
+
         # Check game status after the move
         self.update_game_status()
-        
+
         # Switch turns
         self.current_turn = "black" if self.current_turn == "white" else "white"
         
@@ -317,9 +323,19 @@ class Game:
             self.game_status = "stalemate"
             return
         
-        # Check for draw by 50-move rule
+        # Check for draw
         if self.halfmove_clock >= 100:  # 50 moves = 100 half-moves
-            self.game_status = "draw"
+            self.game_status = "draw 50-move"
+            return
+        
+        if self.is_insufficient_material():
+            self.game_status = "draw insufficient material"
+            return
+        
+        fen = self.get_fen().split(" ")[0:4]
+        fen_key = " ".join(fen)
+        if self.repetition_count.get(fen_key, 0) >= 3:
+            self.game_status = "draw threefold repetition"
             return
         
         # Check if the current player is in check
@@ -328,6 +344,34 @@ class Game:
         else:
             self.game_status = "active"
     
+    def is_insufficient_material(self):
+        """Check for draw due to insufficient mating material"""
+        pieces = []
+        for rank in self.board.board_state:
+            for piece in rank:
+                if piece:
+                    pieces.append(piece)
+
+        # King vs King
+        if len(pieces) == 2:
+            return True
+
+        # King + bishop/knight vs King
+        if len(pieces) == 3:
+            types = [type(p) for p in pieces]
+            if all(t in [King, Bishop, Knight] for t in types):
+                return True
+
+        # King + bishop vs King + bishop, both bishops on same color
+        if len(pieces) == 4:
+            bishops = [p for p in pieces if isinstance(p, Bishop)]
+            if len(bishops) == 2:
+                b1_color = (bishops[0].current_pos[0] + bishops[0].current_pos[1]) % 2
+                b2_color = (bishops[1].current_pos[0] + bishops[1].current_pos[1]) % 2
+                if b1_color == b2_color:
+                    return True
+        return False
+
     def get_fen(self):
         """
         Get the FEN (Forsyth-Edwards Notation) string for the current position.
@@ -370,7 +414,12 @@ class Game:
         """
         if not self.move_history:
             return False
-        
+        # Decrease count of repetition for threefold repetition rule
+        fen = self.get_fen().split(" ")[0:4]
+        fen_key = " ".join(fen)
+        if fen_key in self.repetition_count:
+            self.repetition_count[fen_key] = max(0, self.repetition_count[fen_key] - 1)
+
         # Get the last move
         last_move = self.move_history.pop()
         piece = last_move["piece"]

@@ -184,7 +184,7 @@ class ChessGUI:
 
         pygame.display.update()
 
-    def draw_tie_screen(self):
+    def draw_tie_screen(self, reason):
         """Display the tie because of 50 move rule screen"""
         overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
         overlay.set_alpha(180)
@@ -197,7 +197,13 @@ class ChessGUI:
         self.screen.blit(text, text_rect)
 
         small_font = pygame.font.SysFont("arial", 36)
-        winner_text = small_font.render("The game is drawn due to the 50-move rule.", True, (255, 255, 255))
+        if (reason == "50-move"):
+            winner_text = small_font.render("The game is drawn due to the 50-move rule.", True, (255, 255, 255))
+        elif (reason == "insufficient material"):
+            winner_text = small_font.render("The game is drawn due to insufficient material.", True, (255, 255, 255))
+        else:
+            winner_text = small_font.render("The game is drawn due to the threefold repetition rule.", True, (255, 255, 255))
+
         winner_rect = winner_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 + 20))
         self.screen.blit(winner_text, winner_rect)
 
@@ -238,11 +244,21 @@ class ChessGUI:
                     self.sound_effects["game_end"].play()
                     self.game_end_sound_played = True
                 self.draw_stalemate_screen()
-            if self.game.game_status == "draw":
+            if self.game.game_status == "draw 50-move":
                 if not self.game_end_sound_played:
                     self.sound_effects["game_end"].play()
                     self.game_end_sound_played = True
-                self.draw_tie_screen()
+                self.draw_tie_screen("50-move")
+            if self.game.game_status == "draw insufficient material":
+                if not self.game_end_sound_played:
+                    self.sound_effects["game_end"].play()
+                    self.game_end_sound_played = True
+                self.draw_tie_screen("insufficient material")
+            if self.game.game_status == "draw threefold repetition":
+                if not self.game_end_sound_played:
+                    self.sound_effects["game_end"].play()
+                    self.game_end_sound_played = True
+                self.draw_tie_screen("threefold repetition")
 
             if self.promotion_active:
                 self.draw_promotion_dialog()
