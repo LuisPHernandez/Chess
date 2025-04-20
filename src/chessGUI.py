@@ -302,6 +302,8 @@ class ChessGUI:
                         else:
                             self.sound_effects["move_black"].play()
                         continue
+                    elif (not self.promotion_active) and (x > (self.square_size * 8) or y > (self.square_size * 8)):
+                        continue
 
                     file = int(x // self.square_size)
                     rank = int(abs(800 - y) // self.square_size)
