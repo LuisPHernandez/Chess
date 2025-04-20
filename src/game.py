@@ -414,6 +414,7 @@ class Game:
         """
         if not self.move_history:
             return False
+        
         # Decrease count of repetition for threefold repetition rule
         fen = self.get_fen().split(" ")[0:4]
         fen_key = " ".join(fen)

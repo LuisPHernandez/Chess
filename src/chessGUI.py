@@ -33,7 +33,7 @@ SFX = {
 }
 
 class ChessGUI:
-    def __init__(self, width=800, height=800):
+    def __init__(self, width=950, height=800):
         """Initializes the graphical interface"""
         pygame.init()
         self.width = width
@@ -65,6 +65,35 @@ class ChessGUI:
         for sound, file in SFX.items():
             path = os.path.join(sound_effects_dir, file)
             self.sound_effects[sound] = pygame.mixer.Sound(path)
+
+    def draw_screen(self):
+        """Draws the main game screen with board, pieces, and UI buttons"""
+        self.draw_board()
+        self.draw_pieces()
+
+        # Draw Undo button to the right of the board
+        button_width = 80
+        button_height = 30
+        margin = 10
+        self.undo_button_rect = pygame.Rect(
+            (self.square_size * 8) + (((self.width - min(self.width, self.height)) - button_width) / 2),
+            50,
+            button_width,
+            button_height
+        )
+
+        # Draw background panel
+        panel_rect = pygame.Rect(800, 0, self.width - 800, self.height)
+        pygame.draw.rect(self.screen, (230, 230, 230), panel_rect)
+
+        # Draw button and text
+        pygame.draw.rect(self.screen, (200, 200, 200), self.undo_button_rect)
+        pygame.draw.rect(self.screen, (50, 50, 50), self.undo_button_rect, 2)
+
+        font = pygame.font.SysFont("arial", 24)
+        text = font.render("Undo", True, (0, 0, 0))
+        text_rect = text.get_rect(center=self.undo_button_rect.center)
+        self.screen.blit(text, text_rect)
 
     def draw_board(self):
         """Draws board on the screen"""
@@ -213,8 +242,7 @@ class ChessGUI:
         """Runs the main game loop"""
         self.sound_effects["game_start"].play()
         while self.running:
-            self.draw_board()
-            self.draw_pieces()
+            self.draw_screen()
 
             # Highlight possible moves
             for move in self.game.possible_moves:
@@ -268,6 +296,15 @@ class ChessGUI:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     x, y = pygame.mouse.get_pos()
+
+                    if hasattr(self, "undo_button_rect") and self.undo_button_rect.collidepoint(x, y):
+                        self.game.undo_move()
+                        if (self.game.current_turn == "white"):
+                            self.sound_effects["move_white"].play()
+                        else:
+                            self.sound_effects["move_black"].play()
+                        continue
+
                     file = int(x // self.square_size)
                     rank = int(abs(800 - y) // self.square_size)
                     
