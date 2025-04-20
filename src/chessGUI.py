@@ -121,14 +121,13 @@ class ChessGUI:
         if not self.promotion_active:
             return
             
-        rank, file = self.game.selected_piece.current_pos
         color = self.game.current_turn
         
         # Draw background
         dialog_width = self.square_size
         dialog_height = self.square_size * 4  # For Q, R, B, N
-        dialog_x = file * self.square_size
-        dialog_y = 0 if rank == 7 else self.square_size - dialog_height  # Position based on rank
+        dialog_x = (self.square_size * 8) + (((self.width - min(self.width, self.height)) - dialog_width) / 2)
+        dialog_y = self.height - (dialog_height + 50)
         
         dialog_rect = pygame.Rect(dialog_x, dialog_y, dialog_width, dialog_height)
         pygame.draw.rect(self.screen, (230, 230, 230), dialog_rect)
@@ -155,9 +154,8 @@ class ChessGUI:
         if not self.promotion_active:
             return None
             
-        rank, file = self.game.selected_piece.current_pos
-        dialog_x = file * self.square_size
-        dialog_y = 0 if rank == 7 else self.height - (self.square_size * 4)
+        dialog_x = (self.square_size * 8) + (((self.width - min(self.width, self.height)) - self.square_size) / 2)
+        dialog_y = self.height - ((self.square_size * 4) + 50)
         
         # Check if click is within dialog
         if dialog_x <= x < dialog_x + self.square_size and dialog_y <= y < dialog_y + (self.square_size * 4):
