@@ -295,6 +295,7 @@ class LocalChessGUI:
 
                     if hasattr(self, "undo_button_rect") and self.undo_button_rect.collidepoint(x, y):
                         self.game.undo_move()
+                        
                         if (self.game.current_turn == "white"):
                             self.sound_effects["move_white"].play()
                         else:
