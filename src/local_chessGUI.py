@@ -7,32 +7,7 @@ from pieces import *
 WHITE = (238, 238, 210)
 BLACK = (118, 150, 86)
 
-PIECE_IMAGES = {
-    "P": "white-pawn.png",
-    "p": "black-pawn.png",
-    "R": "white-rook.png",
-    "r": "black-rook.png",
-    "N": "white-knight.png",
-    "n": "black-knight.png",
-    "B": "white-bishop.png",
-    "b": "black-bishop.png",
-    "Q": "white-queen.png",
-    "q": "black-queen.png",
-    "K": "white-king.png",
-    "k": "black-king.png"
-}
-
-SFX = {
-    "check": "check.mp3",
-    "game_start": "game-start.mp3",
-    "game_end": "game-end.mp3",
-    "move_white": "move-self.mp3",
-    "move_black": "move-opponent.mp3",
-    "capture": "capture.mp3",
-    "promotion": "promote.mp3"
-}
-
-class ChessGUI:
+class LocalChessGUI:
     def __init__(self, width=950, height=800):
         """Initializes the graphical interface"""
         pygame.init()
@@ -50,19 +25,42 @@ class ChessGUI:
 
     def load_images(self):
         """Loads images fot the chess pieces"""
-        self.images = {}
+        self.images = {
+            "P": "white-pawn.png",
+            "p": "black-pawn.png",
+            "R": "white-rook.png",
+            "r": "black-rook.png",
+            "N": "white-knight.png",
+            "n": "black-knight.png",
+            "B": "white-bishop.png",
+            "b": "black-bishop.png",
+            "Q": "white-queen.png",
+            "q": "black-queen.png",
+            "K": "white-king.png",
+            "k": "black-king.png"
+        }
+
         images_dir = os.path.join("static", "images") 
 
-        for piece, file in PIECE_IMAGES.items():
+        for piece, file in self.images.items():
             path = os.path.join(images_dir, file)
             self.images[piece] = pygame.transform.scale(pygame.image.load(path), (self.square_size, self.square_size))
     
     def load_sound_effects(self):
         """Loads sound effects"""
-        self.sound_effects = {}
+        self.sound_effects = {
+            "check": "check.mp3",
+            "game_start": "game-start.mp3",
+            "game_end": "game-end.mp3",
+            "move_white": "move-self.mp3",
+            "move_black": "move-opponent.mp3",
+            "capture": "capture.mp3",
+            "promotion": "promote.mp3"
+        }
+
         sound_effects_dir = os.path.join("static", "sound_effects")
 
-        for sound, file in SFX.items():
+        for sound, file in self.sound_effects.items():
             path = os.path.join(sound_effects_dir, file)
             self.sound_effects[sound] = pygame.mixer.Sound(path)
 
@@ -72,18 +70,18 @@ class ChessGUI:
         self.draw_pieces()
 
         # Draw Undo button to the right of the board
-        button_width = 80
-        button_height = 30
-        margin = 10
+        button_width = ((self.width - (self.square_size * 8)) / 2)
+        button_height = (0.4 * button_width)
+        margin = (0.1 * button_width)
         self.undo_button_rect = pygame.Rect(
-            (self.square_size * 8) + (((self.width - min(self.width, self.height)) - button_width) / 2),
+            (self.square_size * 8) + (((self.width - (self.square_size * 8)) - button_width) / 2),
             50,
             button_width,
             button_height
         )
 
         # Draw background panel
-        panel_rect = pygame.Rect(800, 0, self.width - 800, self.height)
+        panel_rect = pygame.Rect((self.square_size * 8), 0, self.width - (self.square_size * 8), self.height)
         pygame.draw.rect(self.screen, (230, 230, 230), panel_rect)
 
         # Draw button and text
@@ -112,7 +110,7 @@ class ChessGUI:
             for char in line:
                 if char.isdigit():
                     file += int(char)
-                elif char in PIECE_IMAGES:
+                elif char in self.images:
                     self.screen.blit(self.images[char], (file * self.square_size, rank * self.square_size))
                     file += 1
 
@@ -306,7 +304,7 @@ class ChessGUI:
                         continue
 
                     file = int(x // self.square_size)
-                    rank = int(abs(800 - y) // self.square_size)
+                    rank = int(abs((self.square_size * 8) - y) // self.square_size)
                     
                     if self.promotion_active:
                         selected_class = self.handle_promotion_selection(x, y)
