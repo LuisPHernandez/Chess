@@ -418,11 +418,14 @@ class Game:
         self.selected_piece = None
         self.possible_moves = []
 
+        # Switch back to the previous player's turn
+        self.current_turn = "black" if self.current_turn == "white" else "white"
+
         # Decrease count of repetition for threefold repetition rule
         fen = self.get_fen().split(" ")[0:4]
         fen_key = " ".join(fen)
         if fen_key in self.repetition_count:
-            self.repetition_count[fen_key] = max(0, self.repetition_count[fen_key] - 1)
+            self.repetition_count[fen_key] = max(0, self.repetition_count[fen_key]) - 1
 
         # Get the last move
         last_move = self.move_history.pop()
@@ -455,6 +458,8 @@ class Game:
                 captured_pos = (from_pos[0], to_pos[1])
                 self.board.board_state[captured_pos[0]][captured_pos[1]] = captured
                 captured.current_pos = captured_pos
+                en_passant_color = "black" if self.current_turn == "white" else "white"
+                self.en_passant_target = (en_passant_color, to_pos[0], to_pos[1])
             else:
                 # Normal capture
                 self.board.board_state[to_pos[0]][to_pos[1]] = captured
@@ -467,9 +472,6 @@ class Game:
         else:
             # If this was the first move, reset to 0
             self.halfmove_clock = 0
-        
-        # Switch back to the previous player's turn
-        self.current_turn = "black" if self.current_turn == "white" else "white"
         
         # Update game status
         self.update_game_status()
