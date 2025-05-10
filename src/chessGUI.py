@@ -1,9 +1,9 @@
 import pygame
 import os
-from chess_ai import ChessAI
 from game import Game
 from pieces import *
 from local_game_handler import LocalGameHandler
+from ai_game_handler import AIGameHandler
 
 # Define global variables
 WHITE = (238, 238, 210)
@@ -20,13 +20,9 @@ class ChessGUI:
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self.load_images()
         self.load_sound_effects()
-        self.running = True
         self.check_sound_played = False
         self.game_end_sound_played = False
         self.promotion_active = False
-        self.human_player_color = None
-        self.ai_color = "white" if self.human_player_color == "black" else "black"
-        self.ai = ChessAI(self.game, self.ai_color)
 
     def load_images(self):
         """Loads images fot the chess pieces"""
@@ -240,11 +236,10 @@ class ChessGUI:
         pygame.display.update()
         
     def run(self, game_mode):
-        """Determines which game mode will be played"""
+        """Runs the selected game mode"""
         if game_mode == "local":
             handler = LocalGameHandler(self.game, self)
         elif game_mode == "ai":
-            # TODO handler = AIGameHandler(self.game, self)
-            pass
+            handler = AIGameHandler(self.game, self)
 
         handler.run()

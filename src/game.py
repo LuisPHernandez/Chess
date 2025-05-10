@@ -466,7 +466,7 @@ class Game:
                 captured.current_pos = to_pos
 
         # Recover en passant target
-        if isinstance(self.move_history[-1]["piece"], Pawn):
+        if len(self.move_history) > 0 and isinstance(self.move_history[-1]["piece"], Pawn):
             if abs(self.move_history[-1]["to"][0] - self.move_history[-1]["from"][0]) == 2:
                 self.en_passant_target = ("white" if self.current_turn == "black" else "black", (self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) / 2, self.move_history[-1]["from"][1])
 

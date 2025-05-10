@@ -2,7 +2,7 @@ import pygame
 
 class LocalGameHandler:
     def __init__(self, game, gui):
-        """Handles the game loop for local multiplayer mode"""
+        """Initializes the handler for local multiplayer mode"""
         self.game = game
         self.gui = gui
         self.running = True
@@ -41,6 +41,7 @@ class LocalGameHandler:
                                 (self.gui.square_size * 0.4))
 
     def display_game_status(self):
+        """Displays end game screens and plays sounds"""
         if self.game.game_status == "check":
             if not self.gui.check_sound_played:
                 self.gui.sound_effects["check"].play()
