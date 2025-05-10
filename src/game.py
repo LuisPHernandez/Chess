@@ -19,6 +19,7 @@ class Game:
         self.halfmove_clock = 0  # For 50-move rule
         self.fullmove_number = 1  # Increments after black's move
         self.repetition_count = {} # For threefold repetition rule
+        self.fen_history = [self.get_fen()] # Board state history
 
     def find_king(self, color):
         """Find the position of a king of the specified color"""
@@ -211,6 +212,9 @@ class Game:
         # Clear selection
         self.selected_piece = None
         self.possible_moves = []
+
+        # Update board state history
+        self.fen_history.append(self.get_fen())
         
         return True
     
@@ -409,7 +413,7 @@ class Game:
     
     def undo_move(self):
         """
-        Undo the last move made.
+        Undooes the last move made.
         Returns True if a move was undone, False if there's no move to undo.
         """
         if not self.move_history:
@@ -484,5 +488,83 @@ class Game:
         # Decrement fullmove number if needed
         if self.current_turn == "black":
             self.fullmove_number -= 1
+        
+        return True
+    
+    def undo_move_ai_opp(self):
+        """
+        Undoes the last move made in a single player game vs an AI opponent.
+        Returns True if a move was undone, False if there's no move to undo.
+        """
+        if not self.move_history:
+            return False
+        
+        self.selected_piece = None
+        self.possible_moves = []
+
+        # Decrease count of repetition for threefold repetition rule
+        for i in range(1, 3):
+            fen = self.fen_history[-i].split(" ")[0:4]
+            fen_key = " ".join(fen)
+            if fen_key in self.repetition_count:
+                self.repetition_count[fen_key] = max(0, self.repetition_count[fen_key]) - 1
+
+        # Get the last two moves
+        for i in range(2):
+            last_move = self.move_history.pop()
+            piece = last_move["piece"]
+            from_pos = last_move["from"]
+            to_pos = last_move["to"]
+            captured = last_move["captured"]
+            promotion = last_move["promotion"]
+            castling = last_move["castling"]
+            rook = last_move["rook"]
+            rook_from = last_move["rook_from"]
+        
+            # Check if this was an en passant capture
+            was_en_passant = isinstance(piece, Pawn) and captured and to_pos != captured.current_pos
+
+            if promotion:
+                piece = Pawn(piece.color, to_pos)
+        
+            if castling:
+                self.board.move_piece(rook, rook_from)
+
+            # Move the piece back
+            self.board.move_piece(piece, from_pos)
+        
+            # Restore captured piece if any
+            if captured:
+                if was_en_passant:
+                    # For en passant, the captured pawn's position is different
+                    # It's in the same file as the destination but same rank as the starting position
+                    captured_pos = (from_pos[0], to_pos[1])
+                    self.board.board_state[captured_pos[0]][captured_pos[1]] = captured
+                    captured.current_pos = captured_pos
+                    en_passant_color = "black" if self.current_turn == "white" else "white"
+                    self.en_passant_target = (en_passant_color, to_pos[0], to_pos[1])
+                else:
+                    # Normal capture
+                    self.board.board_state[to_pos[0]][to_pos[1]] = captured
+                    captured.current_pos = to_pos
+
+            # Recover en passant target
+            if len(self.move_history) > 0 and isinstance(self.move_history[-1]["piece"], Pawn):
+                if abs(self.move_history[-1]["to"][0] - self.move_history[-1]["from"][0]) == 2:
+                    self.en_passant_target = ("white" if self.current_turn == "black" else "black", (self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) / 2, self.move_history[-1]["from"][1])
+
+            # Restore the halfmove clock from before this move was made
+            if len(self.move_history) > 0:
+                # Get the clock value from the previous move record
+                self.halfmove_clock = self.move_history[-1]["half-move clock"]
+            else:
+                # If this was the first move, reset to 0
+                self.halfmove_clock = 0
+        
+        # Update game status
+        self.update_game_status()
+        
+        # Decrement fullmove number
+        self.fullmove_number -= 1
         
         return True

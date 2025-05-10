@@ -17,9 +17,9 @@ class AIGameHandler:
         self.gui.sound_effects["game_start"].play()
         while self.running:
             self.gui.draw_screen()
-            
+            self.display_game_status()
+
             if self.game.current_turn == self.human_player_color:
-                self.display_game_status()
                 self.highlight_possible_moves()
 
                 if self.gui.promotion_active:
@@ -32,10 +32,16 @@ class AIGameHandler:
                         self.handle_mouse_click()
                     elif event.type == pygame.VIDEORESIZE:
                         self.gui.handle_resize(event.size)
-            
             else:
+                pygame.display.update()
+                time.sleep(0.5)
                 self.ai.make_move()
-                self.display_game_status()
+                if (self.game.move_history[-1]["captured"]):
+                    self.gui.sound_effects["capture"].play()
+                elif (self.game.current_turn == "black"):
+                    self.gui.sound_effects["move_white"].play()
+                else:
+                    self.gui.sound_effects["move_black"].play()
 
             pygame.display.update()
         pygame.quit()
@@ -90,7 +96,7 @@ class AIGameHandler:
         """Handles mouse clicks for the local game mode"""
         x, y = pygame.mouse.get_pos()
         if hasattr(self.gui, "undo_button_rect") and self.gui.undo_button_rect.collidepoint(x, y):
-            self.game.undo_move()
+            self.game.undo_move_ai_opp()
             
             if (self.game.current_turn == "white"):
                 self.gui.sound_effects["move_white"].play()
