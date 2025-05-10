@@ -142,7 +142,7 @@ class MenuGUI:
                 "rect": pygame.Rect(center_x - button_width // 2, start_y + spacing, button_width, button_height),
                 "text": "Play vs AI",
                 "hover": False,
-                "active": False,  # TODO AI mode is not implemented yet
+                "active": True,
                 "icon": "q",
                 "click_effect": 0,
                 "particles": []
@@ -246,14 +246,6 @@ class MenuGUI:
         # Draw buttons
         for button_key, button in self.buttons.items():
             self.draw_button(button)
-            
-        # Draw "Not Implemented" note for AI option
-        if not self.buttons["ai"]["active"]:
-            note_text = self.small_font.render("(Not Implemented Yet)", True, (180, 0, 0))
-            note_rect = note_text.get_rect(
-                center=(self.buttons["ai"]["rect"].centerx, self.buttons["ai"]["rect"].bottom + 25)
-            )
-            self.screen.blit(note_text, note_rect)
             
         # Draw bottom copyright panel
         self.draw_panel(self.copyright_panel, shadow_offset=3)
@@ -433,52 +425,16 @@ class MenuGUI:
                     if self.buttons["ai"]["rect"].collidepoint(mouse_pos):
                         self.button_click_effect("ai")
                         
-                        # Create message panel
-                        overlay_width, overlay_height = 400, 120
-                        overlay = pygame.Surface((overlay_width, overlay_height), pygame.SRCALPHA)
-                        overlay_rect = overlay.get_rect(center=(self.width // 2, self.height // 2))
-                        
-                        # Draw panel with animation
-                        for size_factor in range(5, 11):
-                            scaled_size = (overlay_width * size_factor // 10, overlay_height * size_factor // 10)
-                            temp_overlay = pygame.transform.scale(overlay, scaled_size)
-                            temp_rect = temp_overlay.get_rect(center=(self.width // 2, self.height // 2))
-                            
-                            # Draw current frame
+                        # Small delay for button animation
+                        start_time = pygame.time.get_ticks()
+                        while pygame.time.get_ticks() - start_time < 200:
                             self.update_animations()
                             self.draw_menu()
-                            
-                            # Draw panel shadow
-                            shadow_rect = temp_rect.copy()
-                            shadow_rect.x += 5
-                            shadow_rect.y += 5
-                            pygame.draw.rect(self.screen, (0, 0, 0, 100), shadow_rect, border_radius=15)
-                            
-                            # Draw panel
-                            pygame.draw.rect(temp_overlay, (250, 250, 250, 230), temp_overlay.get_rect(), border_radius=15)
-                            pygame.draw.rect(temp_overlay, (100, 100, 100, 255), temp_overlay.get_rect(), 2, border_radius=15)
-                            
-                            # Draw message if full size
-                            if size_factor == 10:
-                                message_text = self.subtitle_font.render("AI Mode Not Implemented Yet", True, (180, 0, 0))
-                                message_rect = message_text.get_rect(center=(overlay_width//2, overlay_height//2))
-                                overlay.blit(message_text, message_rect)
-                                
-                                # Draw additional info
-                                info_text = self.small_font.render("Check back in a future update!", True, (100, 100, 100))
-                                info_rect = info_text.get_rect(center=(overlay_width//2, overlay_height//2 + 30))
-                                overlay.blit(info_text, info_rect)
-                                
-                                # Add the overlay to the screen
-                                self.screen.blit(overlay, overlay_rect)
-                            else:
-                                self.screen.blit(temp_overlay, temp_rect)
-                                
                             pygame.display.update()
-                            pygame.time.delay(20)
+                            self.clock.tick(60)
                             
-                        # Keep message visible
-                        pygame.time.delay(1500)
+                        self.selected_option = "ai"
+                        self.running = False
             
             pygame.display.update()
             
