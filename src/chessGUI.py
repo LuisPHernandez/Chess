@@ -1,13 +1,15 @@
 import pygame
 import os
+from chess_ai import ChessAI
 from game import Game
 from pieces import *
+from local_game_handler import LocalGameHandler
 
 # Define global variables
 WHITE = (238, 238, 210)
 BLACK = (118, 150, 86)
 
-class LocalChessGUI:
+class ChessGUI:
     def __init__(self, width=950, height=800):
         """Initializes the graphical interface"""
         pygame.init()
@@ -22,6 +24,9 @@ class LocalChessGUI:
         self.check_sound_played = False
         self.game_end_sound_played = False
         self.promotion_active = False
+        self.human_player_color = None
+        self.ai_color = "white" if self.human_player_color == "black" else "black"
+        self.ai = ChessAI(self.game, self.ai_color)
 
     def load_images(self):
         """Loads images fot the chess pieces"""
@@ -234,105 +239,12 @@ class LocalChessGUI:
 
         pygame.display.update()
         
-    def run(self):
-        """Runs the main game loop"""
-        self.sound_effects["game_start"].play()
-        while self.running:
-            self.draw_screen()
+    def run(self, game_mode):
+        """Determines which game mode will be played"""
+        if game_mode == "local":
+            handler = LocalGameHandler(self.game, self)
+        elif game_mode == "ai":
+            # TODO handler = AIGameHandler(self.game, self)
+            pass
 
-            # Highlight possible moves
-            for move in self.game.possible_moves:
-                rank, file = move
-                rank = abs(7 - rank)
-                pygame.draw.circle(self.screen, (145, 145, 145), 
-                                (((self.square_size * file) + (self.square_size * 0.5)), 
-                                ((self.square_size * rank) + (self.square_size * 0.5))), 
-                                (self.square_size * 0.4))
-
-            # Display game status
-            if self.game.game_status == "check":
-                if not self.check_sound_played:
-                    self.sound_effects["check"].play()
-                    self.check_sound_played = True
-            else:
-                self.check_sound_played = False
-            if self.game.game_status == "checkmate":
-                if not self.game_end_sound_played:
-                    self.sound_effects["game_end"].play()
-                    self.sound_effects["check"].play()
-                    self.check_sound_played = True
-                    self.game_end_sound_played = True
-                self.draw_checkmate_screen()
-            if self.game.game_status == "stalemate":
-                if not self.game_end_sound_played:
-                    self.sound_effects["game_end"].play()
-                    self.game_end_sound_played = True
-                self.draw_stalemate_screen()
-            if self.game.game_status == "draw 50-move":
-                if not self.game_end_sound_played:
-                    self.sound_effects["game_end"].play()
-                    self.game_end_sound_played = True
-                self.draw_tie_screen("50-move")
-            if self.game.game_status == "draw insufficient material":
-                if not self.game_end_sound_played:
-                    self.sound_effects["game_end"].play()
-                    self.game_end_sound_played = True
-                self.draw_tie_screen("insufficient material")
-            if self.game.game_status == "draw threefold repetition":
-                if not self.game_end_sound_played:
-                    self.sound_effects["game_end"].play()
-                    self.game_end_sound_played = True
-                self.draw_tie_screen("threefold repetition")
-
-            if self.promotion_active:
-                self.draw_promotion_dialog()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONUP:
-                    x, y = pygame.mouse.get_pos()
-
-                    if hasattr(self, "undo_button_rect") and self.undo_button_rect.collidepoint(x, y):
-                        self.game.undo_move()
-                        
-                        if (self.game.current_turn == "white"):
-                            self.sound_effects["move_white"].play()
-                        else:
-                            self.sound_effects["move_black"].play()
-                        continue
-                    elif (not self.promotion_active) and (x > (self.square_size * 8) or y > (self.square_size * 8)):
-                        continue
-
-                    file = int(x // self.square_size)
-                    rank = int(abs((self.square_size * 8) - y) // self.square_size)
-                    
-                    if self.promotion_active:
-                        selected_class = self.handle_promotion_selection(x, y)
-                        if selected_class:  # Only proceed if a piece was selected
-                            self.game.finish_promotion(selected_class)
-                            self.sound_effects["promotion"].play()
-                            continue
-
-                    # Select piece or make move
-                    if self.game.selected_piece is None:
-                        self.game.select_piece((rank, file))
-                    else:
-                        # Try to move the selected piece
-                        result = self.game.make_move((rank, file))
-                        if result:
-                            if (self.game.move_history[-1]["captured"]):
-                                self.sound_effects["capture"].play()
-                            elif (self.game.current_turn == "black"):
-                                self.sound_effects["move_white"].play()
-                            else:
-                                self.sound_effects["move_black"].play()
-                        elif self.game.game_status == "promotion":
-                            # If move was a promotion
-                            self.promotion_active = True
-                        elif not result:
-                            # If move failed for other reasons, try to select a different piece
-                            self.game.select_piece((rank, file))
-
-            pygame.display.update()
-        pygame.quit()
+        handler.run()
