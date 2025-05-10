@@ -419,7 +419,7 @@ class Game:
         self.possible_moves = []
 
         # Switch back to the previous player's turn
-        self.current_turn = "black" if self.current_turn == "white" else "white"
+        self.current_turn = "white" if self.current_turn == "black" else "black"
 
         # Decrease count of repetition for threefold repetition rule
         fen = self.get_fen().split(" ")[0:4]
@@ -465,7 +465,12 @@ class Game:
                 self.board.board_state[to_pos[0]][to_pos[1]] = captured
                 captured.current_pos = to_pos
 
-         # Restore the halfmove clock from before this move was made
+        # Recover en passant target
+        if isinstance(self.move_history[-1]["piece"], Pawn):
+            if abs(self.move_history[-1]["to"][0] - self.move_history[-1]["from"][0]) == 2:
+                self.en_passant_target = ("white" if self.current_turn == "black" else "black", (self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) / 2, self.move_history[-1]["from"][1])
+
+        # Restore the halfmove clock from before this move was made
         if len(self.move_history) > 0:
             # Get the clock value from the previous move record
             self.halfmove_clock = self.move_history[-1]["half-move clock"]
