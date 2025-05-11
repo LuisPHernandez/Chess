@@ -16,21 +16,22 @@ class ChessAI:
         self.white_points = 0
         self.black_points = 0
 
-        def minimax(depth):
-            depth -= 1
+    def minimax(self, depth):
+        depth -= 1
 
-        def calculate_points():
-            for rank in self.game.board.board_state:
-                for file in rank:
+    def calculate_points(self):
+        for rank in self.game.board.board_state:
+            for file in rank:
+                if file:
                     if file.color == "white":
-                        if type(file).__name__ in self.piece_values.keys:
-                            self.white_points + self.piece_values[type(file).__name__]
+                        if type(file).__name__ in self.piece_values.keys():
+                            self.white_points += self.piece_values[type(file).__name__]
                     elif file.color == "black":
-                        if type(file).__name__ in self.piece_values.keys:
-                            self.white_points + self.piece_values[type(file).__name__]
+                        if type(file).__name__ in self.piece_values.keys():
+                            self.black_points += self.piece_values[type(file).__name__]
 
-        def evaluate():
-            
+    def evaluate():
+        pass
 
 
 
