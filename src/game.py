@@ -206,15 +206,15 @@ class Game:
         # Check game status after the move
         self.update_game_status()
 
+        # Update board state history
+        self.fen_history.append(self.get_fen())
+
         # Switch turns
         self.current_turn = "black" if self.current_turn == "white" else "white"
         
         # Clear selection
         self.selected_piece = None
         self.possible_moves = []
-
-        # Update board state history
-        self.fen_history.append(self.get_fen())
         
         return True
     
