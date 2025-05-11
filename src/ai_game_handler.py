@@ -35,7 +35,6 @@ class AIGameHandler:
                         self.gui.handle_resize(event.size) # TODO implement resize handling in the GUI
             else:
                 pygame.display.update()
-                time.sleep(0.5)
                 self.ai.make_move()
                 if (self.game.move_history[-1]["captured"]):
                     self.gui.sound_effects["capture"].play()

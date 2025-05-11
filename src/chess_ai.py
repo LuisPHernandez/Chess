@@ -17,7 +17,38 @@ class ChessAI:
         self.black_points = 0
 
     def minimax(self, depth):
-        depth -= 1
+        if (depth == 0) or (self.game.update_game_status() == "terminal"):
+            return None, self.evaluate()
+        
+        piece_moves = self.game.get_all_legal_moves()
+        random_best_piece = random.randint(0, (len(piece_moves) - 1))
+        best_move = (piece_moves[random_best_piece], piece_moves[random_best_piece][random.randint(0, (len(piece_moves[random_best_piece]) - 1))])
+
+        if (self.game.current_turn == self.color):
+            max_value = float("-inf")
+            for piece in piece_moves:
+                for move in piece[1]:
+                    self.game.select_piece(piece[0].current_pos)
+                    self.game.make_move(move)
+                    current_value = self.minimax(depth - 1)
+                    self.game.undo_move()
+                    if current_value[1] > max_value:
+                        max_value = current_value[1]
+                        best_move = (piece[0], move)
+            return best_move, max_value
+        else:
+            min_value = float("inf")
+            for piece in piece_moves:
+                for move in piece[1]:
+                    self.game.select_piece(piece[0].current_pos)
+                    self.game.make_move(move)
+                    current_value = self.minimax(depth - 1)
+                    self.game.undo_move()
+                    if current_value[1] < min_value:
+                        min_value = current_value[1]
+                        best_move = (piece[0], move)
+            return best_move, min_value
+
 
     def calculate_points(self):
         for rank in self.game.board.board_state:
@@ -30,43 +61,13 @@ class ChessAI:
                         if type(file).__name__ in self.piece_values.keys():
                             self.black_points += self.piece_values[type(file).__name__]
 
-    def evaluate():
-        pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def make_move(self):
-        legal_moves = []
-        while not legal_moves:
-            self.select_piece()
-            legal_moves = self.game.get_legal_moves(self.selected_piece)
-        move = legal_moves[random.randint(0, len(legal_moves) - 1)]
-        self.game.make_move(move)
-
-    def select_piece(self):
-        pieces_in_board = []
-        for rank in self.game.board.board_state:
-            for piece in rank:
-                if piece and piece.color == self.color:
-                    pieces_in_board.append(piece)
+    def evaluate(self):
+        if self.color == "white":
+            return self.white_points - self.black_points
+        else:
+            return self.black_points - self.white_points
         
-        self.selected_piece = pieces_in_board[random.randint(0, len(pieces_in_board) - 1)]
-        self.game.select_piece(self.selected_piece.current_pos)
+    def make_move(self):
+        move, value = self.minimax(2)
+        self.game.select_piece(move[0].current_pos)
+        self.game.make_move(move[1])

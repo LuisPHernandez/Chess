@@ -93,6 +93,14 @@ class Game:
 
         return legal_moves
     
+    def get_all_legal_moves(self):
+        all_moves = []
+        for rank in self.board.board_state:
+            for file in rank:
+                if file and (file.color == self.current_turn):
+                    all_moves.append((file, self.get_legal_moves(file)))
+        return all_moves
+    
     def make_move(self, end_position):
         """
         Move the currently selected piece to the end position if it's a legal move.
@@ -321,26 +329,26 @@ class Game:
         # Check for checkmate or stalemate
         if self.is_checkmate(opponent_color):
             self.game_status = "checkmate"
-            return
+            return "terminal"
         
         if self.is_stalemate(opponent_color):
             self.game_status = "stalemate"
-            return
+            return "terminal"
         
         # Check for draw
         if self.halfmove_clock >= 100:  # 50 moves = 100 half-moves
             self.game_status = "draw 50-move"
-            return
+            return "terminal"
         
         if self.is_insufficient_material():
             self.game_status = "draw insufficient material"
-            return
+            return "terminal"
         
         fen = self.get_fen().split(" ")[0:4]
         fen_key = " ".join(fen)
         if self.repetition_count.get(fen_key, 0) >= 3:
             self.game_status = "draw threefold repetition"
-            return
+            return "terminal"
         
         # Check if the current player is in check
         if self.is_in_check(opponent_color):
