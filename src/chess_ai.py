@@ -6,13 +6,51 @@ class ChessAI:
         self.color = color
         self.selected_piece = None
         self.piece_values = {
-            "Pawn": 100,
-            "Knight": 320,
-            "Bishop": 330,
-            "Rook": 500,
-            "Queen": 900,
-            "King": 20000
+            "Pawn": 10,
+            "Knight": 30,
+            "Bishop": 31,
+            "Rook": 50,
+            "Queen": 90,
+            "King": 2000
         }
+        self.white_points = 0
+        self.black_points = 0
+
+        def minimax(depth):
+            depth -= 1
+
+        def calculate_points():
+            for rank in self.game.board.board_state:
+                for file in rank:
+                    if file.color == "white":
+                        if type(file).__name__ in self.piece_values.keys:
+                            self.white_points + self.piece_values[type(file).__name__]
+                    elif file.color == "black":
+                        if type(file).__name__ in self.piece_values.keys:
+                            self.white_points + self.piece_values[type(file).__name__]
+
+        def evaluate():
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def make_move(self):
         legal_moves = []
