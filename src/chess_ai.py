@@ -21,8 +21,7 @@ class ChessAI:
             return None, self.evaluate()
         
         piece_moves = self.game.get_all_legal_moves()
-        random_best_piece = random.randint(0, (len(piece_moves) - 1))
-        best_move = (piece_moves[random_best_piece], piece_moves[random_best_piece][random.randint(0, (len(piece_moves[random_best_piece]) - 1))])
+        best_move = None
 
         if (self.game.current_turn == self.color):
             max_value = float("-inf")
@@ -51,6 +50,8 @@ class ChessAI:
 
 
     def calculate_points(self):
+        self.white_points = 0
+        self.black_points = 0
         for rank in self.game.board.board_state:
             for file in rank:
                 if file:
@@ -62,6 +63,7 @@ class ChessAI:
                             self.black_points += self.piece_values[type(file).__name__]
 
     def evaluate(self):
+        self.calculate_points()
         if self.color == "white":
             return self.white_points - self.black_points
         else:
