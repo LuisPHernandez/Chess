@@ -1,6 +1,6 @@
 import pygame
 import time
-from chess_ai import ChessAI
+from code.chess_ai import ChessAI
 
 class AIGameHandler:
     def __init__(self, game, gui):
