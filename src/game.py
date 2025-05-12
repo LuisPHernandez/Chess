@@ -480,7 +480,7 @@ class Game:
         # Recover en passant target
         if len(self.move_history) > 0 and isinstance(self.move_history[-1]["piece"], Pawn):
             if abs(self.move_history[-1]["to"][0] - self.move_history[-1]["from"][0]) == 2:
-                self.en_passant_target = ("white" if self.current_turn == "black" else "black", (self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) / 2, self.move_history[-1]["from"][1])
+                self.en_passant_target = ("white" if self.current_turn == "black" else "black", int((self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) // 2), self.move_history[-1]["from"][1])
 
         # Restore the halfmove clock from before this move was made
         if len(self.move_history) > 0:
@@ -562,7 +562,7 @@ class Game:
             # Recover en passant target
             if len(self.move_history) > 0 and isinstance(self.move_history[-1]["piece"], Pawn):
                 if abs(self.move_history[-1]["to"][0] - self.move_history[-1]["from"][0]) == 2:
-                    self.en_passant_target = ("white" if self.current_turn == "black" else "black", int((self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) / 2), self.move_history[-1]["from"][1])
+                    self.en_passant_target = ("white" if self.current_turn == "black" else "black", int((self.move_history[-1]["from"][0] + self.move_history[-1]["to"][0]) // 2), self.move_history[-1]["from"][1])
             else:
                 self.en_passant_target = None
 
